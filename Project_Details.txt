@@ -4,5 +4,13 @@ This is regarding a project that helps VISUALLY IMPAIRED PEOPLE and PEOPLE WITH 
 
 Project Name : Ensuring surety and accuracy in goods that bought by Visually impaired people and people with diminished vision
 
+
+Motivation : This project is being developed in order to help blind people and people with diminshed vision and also old people.
+
+This change in this file will only be shown in the New_Branch but not in the Master_Branch.
+
+Done with my changes.
+
 Final edit.
 Thank You.
+
