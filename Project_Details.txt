@@ -7,3 +7,5 @@ Project Name : Ensuring surety and accuracy in goods that bought by Visually imp
 Motivation : This project is being developed in order to help blind people and people with diminshed vision and also old people.
 
 This change in this file will only be shown in the New_Branch but not in the Master_Branch.
+
+Done with my changes.
